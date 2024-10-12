@@ -61,6 +61,10 @@ void InfoNES_PadState(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem)
             {
                 printf("START\n");
             }
+            if (pushed & SELECT)
+            {
+                printf("SELECT\n");
+            }
             if (pushed & A)
             {
                printf("A\n");

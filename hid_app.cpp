@@ -16,6 +16,8 @@ extern "C"
 
     namespace
     {
+        uint8_t previousbuffer[64];
+        bool firstReport = true;
         uint8_t _report_count[CFG_TUH_HID];
         tuh_hid_report_info_t _report_info_arr[CFG_TUH_HID][MAX_REPORT];
 
@@ -27,6 +29,16 @@ extern "C"
         bool isDS5(uint16_t vid, uint16_t pid)
         {
             return vid == 0x054c && pid == 0x0ce6;
+        }
+
+        bool isGenesisMini(uint16_t vid, uint16_t pid)
+        {
+            return vid == 0x0ca3 && pid == 0x0025;
+        }
+
+        bool isMantaPad(uint16_t vid, uint16_t pid)
+        {
+            return vid == 0x081f && pid == 0xe401;
         }
 
         struct DS4Report
@@ -98,6 +110,32 @@ extern "C"
             };
 
             int getHat() const { return buttons[0] & 15; }
+        };
+
+        // Report for Genesis Mini controller
+        struct GenesisMiniReport
+        {
+            uint8_t byte1;
+            uint8_t byte2;
+            uint8_t byte3;
+            uint8_t byte4;
+            uint8_t byte5;
+            uint8_t byte6;
+            uint8_t byte7;
+            uint8_t byte8;
+            struct Button
+            {
+
+                inline static constexpr int A = 0b01000000;
+                inline static constexpr int B = 0b00100000;
+                inline static constexpr int C = 0b00000010;
+                inline static constexpr int START = 0b00100000;
+                inline static constexpr int UP = 0;
+                inline static constexpr int DOWN = 0b11111111;
+                inline static constexpr int LEFT = 0;
+                inline static constexpr int RIGHT = 0b11111111;
+                ;
+            };
         };
     }
 
@@ -197,6 +235,80 @@ extern "C"
             else
             {
                 printf("Invalid DS5 report size %zd\n", len);
+                return;
+            }
+        }
+        else if (isMantaPad(vid, pid))
+        {
+            if (memcmp(previousbuffer, report, len) != 0 || firstReport)
+            {
+                firstReport = false;
+                printf("MantaPad    : len = %d  - ", len);
+                // print in binary len report bytes
+                for (int i = 0; i < len; i++)
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        printf("%d", (report[i] >> (7 - j)) & 1);
+                    }
+                    printf(" ");
+                }
+
+                printf("\n");
+                // print 8 bytes of report in hex
+                printf("                        ");
+                for (int i = 0; i < len; i++)
+                {
+                    printf("      %02x ", report[i]);
+                }
+                printf("\n");
+                memcpy(previousbuffer, report, len);
+            }
+        }
+        else if (isGenesisMini(vid, pid))
+        {
+            if (sizeof(GenesisMiniReport) == len)
+            {
+                auto r = reinterpret_cast<const GenesisMiniReport *>(report);
+                auto &gp = io::getCurrentGamePadState(0);
+                gp.buttons =
+                    (r->byte6 & GenesisMiniReport::Button::B ? io::GamePadState::Button::B : 0) |
+                    (r->byte6 & GenesisMiniReport::Button::A ? io::GamePadState::Button::A : 0) |
+                    (r->byte7 & GenesisMiniReport::Button::C ? io::GamePadState::Button::SELECT : 0) |
+                    (r->byte7 & GenesisMiniReport::Button::START ? io::GamePadState::Button::START : 0) |
+                    (r->byte5 == GenesisMiniReport::Button::UP ? io::GamePadState::Button::UP : 0) |
+                    (r->byte5 == GenesisMiniReport::Button::DOWN ? io::GamePadState::Button::DOWN : 0) |
+                    (r->byte4 == GenesisMiniReport::Button::LEFT ? io::GamePadState::Button::LEFT : 0) |
+                    (r->byte4 == GenesisMiniReport::Button::RIGHT ? io::GamePadState::Button::RIGHT : 0);
+
+                if (memcmp(previousbuffer, report, len) != 0 || firstReport)
+                {
+                    firstReport = false;
+                    printf("Genesis Mini: len = %d - ", len);
+                    // print in binary len report bytes
+                    for (int i = 0; i < len; i++)
+                    {
+                        for (int j = 0; j < 8; j++)
+                        {
+                            printf("%d", (report[i] >> (7 - j)) & 1);
+                        }
+                        printf(" ");
+                    }
+
+                    printf("\n");
+                    // print 8 bytes of report in hex
+                    printf("                        ");
+                    for (int i = 0; i < len; i++)
+                    {
+                        printf("      %02x ", report[i]);
+                    }
+                    printf("\n");
+                    memcpy(previousbuffer, report, len);
+                }
+            }
+            else
+            {
+                printf("Invalid Genesis Mini report size %zd\n", len);
                 return;
             }
         }
