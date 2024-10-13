@@ -137,8 +137,89 @@ extern "C"
                 ;
             };
         };
+
+        // Report for MantaPad, cheap AliExpress SNES controller
+        struct MantaPadReport
+        {
+            uint8_t byte1;
+            uint8_t byte2;
+            uint8_t byte3;
+            uint8_t byte4;
+            uint8_t byte5;
+            uint8_t byte6;
+            uint8_t byte7;
+            uint8_t byte8;
+
+            struct Button
+            {
+                inline static constexpr int A = 0b00100000;
+                inline static constexpr int B = 0b01000000;
+                inline static constexpr int X = 0b00010000;
+                inline static constexpr int Y = 0b10000000;
+                inline static constexpr int SELECT = 0b00010000;
+                inline static constexpr int START = 0b00100000;
+                inline static constexpr int UP = 0b00000000;
+                inline static constexpr int DOWN = 0b11111111;
+                inline static constexpr int LEFT = 0b00000000;
+                inline static constexpr int RIGHT = 0b11111111;
+                inline static constexpr int SHOULDERLEFT = 0b00000001;
+                inline static constexpr int SHOULDERRIGHT = 0b00000010;
+            };
+        };
+    }
+    static uint8_t const keycode2ascii[128][2] = {HID_KEYCODE_TO_ASCII};
+    // look up new key in previous keys
+    static inline bool find_key_in_report(hid_keyboard_report_t const *report, uint8_t keycode)
+    {
+        for (uint8_t i = 0; i < 6; i++)
+        {
+            if (report->keycode[i] == keycode)
+                return true;
+        }
+
+        return false;
     }
 
+    static void process_kbd_report(hid_keyboard_report_t const *report)
+    {
+        static hid_keyboard_report_t prev_report = {0, 0, {0}}; // previous report to check key released
+
+        //------------- example code ignore control (non-printable) key affects -------------//
+        for (uint8_t i = 0; i < 6; i++)
+        {
+            // A = 4, S = 22, Z=29, X=27, UP=82, DOWN=81, LEFT=80, RIGHT=79
+            if (report->keycode[i])
+            {
+                if (find_key_in_report(&prev_report, report->keycode[i]))
+                {
+                    // exist in previous report means the current key is holding
+                }
+                else
+                {
+                    // not existed in previous report means the current key is pressed
+                    bool const is_shift = report->modifier & (KEYBOARD_MODIFIER_LEFTSHIFT | KEYBOARD_MODIFIER_RIGHTSHIFT);
+                    uint8_t ch = keycode2ascii[report->keycode[i]][is_shift ? 1 : 0];
+                    printf("Key code pressed: %d Ascii - ", report->keycode[i]);
+                    if (ch == '\r')
+                    {
+                        printf("\r"); // added new line for enter key
+                    }
+                    else
+                    {
+                        putchar(ch);
+                    }
+
+                    // #ifndef __ICCARM__                  // TODO IAR doesn't support stream control ?
+                    //                     fflush(stdout); // flush right away, else nanolib will wait for newline
+                    // #endif
+                    putchar('\n');
+                }
+            }
+            // TODO example skips key released
+        }
+
+        prev_report = *report;
+    }
     void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const *desc_report, uint16_t desc_len)
     {
         uint16_t vid, pid;
@@ -240,29 +321,49 @@ extern "C"
         }
         else if (isMantaPad(vid, pid))
         {
-            if (memcmp(previousbuffer, report, len) != 0 || firstReport)
+            if (sizeof(MantaPadReport) == len)
             {
-                firstReport = false;
-                printf("MantaPad    : len = %d  - ", len);
-                // print in binary len report bytes
-                for (int i = 0; i < len; i++)
-                {
-                    for (int j = 0; j < 8; j++)
-                    {
-                        printf("%d", (report[i] >> (7 - j)) & 1);
-                    }
-                    printf(" ");
-                }
+                auto r = reinterpret_cast<const MantaPadReport *>(report);
+                auto &gp = io::getCurrentGamePadState(0);
+                gp.buttons =
+                    (r->byte6 & MantaPadReport::Button::A ? io::GamePadState::Button::A : 0) |
+                    (r->byte6 & MantaPadReport::Button::B ? io::GamePadState::Button::B : 0) |
+                    (r->byte7 & MantaPadReport::Button::START ? io::GamePadState::Button::START : 0) |
+                    (r->byte7 & MantaPadReport::Button::SELECT ? io::GamePadState::Button::SELECT : 0) |
+                    (r->byte2 == MantaPadReport::Button::UP ? io::GamePadState::Button::UP : 0) |
+                    (r->byte2 == MantaPadReport::Button::DOWN ? io::GamePadState::Button::DOWN : 0) |
+                    (r->byte1 == MantaPadReport::Button::LEFT ? io::GamePadState::Button::LEFT : 0) |
+                    (r->byte1 == MantaPadReport::Button::RIGHT ? io::GamePadState::Button::RIGHT : 0);
 
-                printf("\n");
-                // print 8 bytes of report in hex
-                printf("                        ");
-                for (int i = 0; i < len; i++)
+                if (memcmp(previousbuffer, report, len) != 0 || firstReport)
                 {
-                    printf("      %02x ", report[i]);
+                    firstReport = false;
+                    printf("MantaPad    : len = %d  - ", len);
+                    // print in binary len report bytes
+                    for (int i = 0; i < len; i++)
+                    {
+                        for (int j = 0; j < 8; j++)
+                        {
+                            printf("%d", (report[i] >> (7 - j)) & 1);
+                        }
+                        printf(" ");
+                    }
+
+                    printf("\n");
+                    // print 8 bytes of report in hex
+                    printf("                        ");
+                    for (int i = 0; i < len; i++)
+                    {
+                        printf("      %02x ", report[i]);
+                    }
+                    printf("\n");
+                    memcpy(previousbuffer, report, len);
                 }
-                printf("\n");
-                memcpy(previousbuffer, report, len);
+            }
+            else
+            {
+                printf("Invalid MantaPad report size %zd\n", len);
+                return;
             }
         }
         else if (isGenesisMini(vid, pid))
@@ -351,11 +452,51 @@ extern "C"
                 switch (rpt_info->usage)
                 {
                 case HID_USAGE_DESKTOP_KEYBOARD:
-                    TU_LOG1("HID receive keyboard report\n");
-                    // Assume keyboard follow boot report layout
-                    //                process_kbd_report((hid_keyboard_report_t const *)report);
+                {
+                    // TU_LOG1("HID receive keyboard report\n");
+                    //  Assume keyboard follow boot report layout
+                    //  process_kbd_report((hid_keyboard_report_t const *)report);
+                    auto r = reinterpret_cast<const hid_keyboard_report_t *>(report);
+                    auto &gp = io::getCurrentGamePadState(0);
+                    gp.buttons = 0;
+                    for (uint8_t i = 0; i < 6; i++)
+                    {
+                        // A = 4, S = 22, Z=29, X=27, UP=82, DOWN=81, LEFT=80, RIGHT=79
+                        if (r->keycode[i])
+                        {
+                            switch (r->keycode[i])
+                            {
+                            case 4:
+                                gp.buttons |= io::GamePadState::Button::SELECT;
+                                break;
+                            case 22:
+                                gp.buttons |= io::GamePadState::Button::START;
+                                break;
+                            case 29:
+                                gp.buttons |= io::GamePadState::Button::B;
+                                break;
+                            case 27:
+                                gp.buttons |= io::GamePadState::Button::A;
+                                break;
+                            case 82:
+                                gp.buttons |= io::GamePadState::Button::UP;
+                                break;
+                            case 81:
+                                gp.buttons |= io::GamePadState::Button::DOWN;
+                                break;
+                            case 80:
+                                gp.buttons |= io::GamePadState::Button::LEFT;
+                                break;
+                            case 79:
+                                gp.buttons |= io::GamePadState::Button::RIGHT;
+                                break;
+                            default:
+                                break;
+                            }
+                        }
+                    }
                     break;
-
+                }
                 case HID_USAGE_DESKTOP_MOUSE:
                     TU_LOG1("HID receive mouse report\n");
                     // Assume mouse follow boot report layout
