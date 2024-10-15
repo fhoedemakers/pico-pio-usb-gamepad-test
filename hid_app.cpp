@@ -141,7 +141,21 @@ extern "C"
                 ;
             };
         };
-
+        struct PSClassicReport {
+            uint8_t buttons;
+            uint8_t hat;
+            struct Button
+            {
+                inline static constexpr int Circle = 0x02;
+                inline static constexpr int Cross =  0x04;
+                inline static constexpr int SELECT = 0x15;
+                inline static constexpr int START =  0x16;
+                inline static constexpr int UP =     0x04;
+                inline static constexpr int DOWN =   0x24;
+                inline static constexpr int LEFT =   0x10;
+                inline static constexpr int RIGHT =  0x18;
+            };
+        };
         // Report for MantaPad, cheap AliExpress SNES controller
         struct MantaPadReport
         {
@@ -419,24 +433,24 @@ extern "C"
         }
         else if (isPSClassic(vid, pid))
         {
-            // if (sizeof(GenesisMiniReport) == len)
-            // {
-            //     auto r = reinterpret_cast<const GenesisMiniReport *>(report);
-            //     auto &gp = io::getCurrentGamePadState(0);
-            //     gp.buttons =
-            //         (r->byte6 & GenesisMiniReport::Button::B ? io::GamePadState::Button::B : 0) |
-            //         (r->byte6 & GenesisMiniReport::Button::A ? io::GamePadState::Button::A : 0) |
-            //         (r->byte7 & GenesisMiniReport::Button::C ? io::GamePadState::Button::SELECT : 0) |
-            //         (r->byte7 & GenesisMiniReport::Button::START ? io::GamePadState::Button::START : 0) |
-            //         (r->byte5 == GenesisMiniReport::Button::UP ? io::GamePadState::Button::UP : 0) |
-            //         (r->byte5 == GenesisMiniReport::Button::DOWN ? io::GamePadState::Button::DOWN : 0) |
-            //         (r->byte4 == GenesisMiniReport::Button::LEFT ? io::GamePadState::Button::LEFT : 0) |
-            //         (r->byte4 == GenesisMiniReport::Button::RIGHT ? io::GamePadState::Button::RIGHT : 0);
-
+            if (sizeof(PSClassicReport) == len)
+            {
+                auto r = reinterpret_cast<const PSClassicReport *>(report);
+                auto &gp = io::getCurrentGamePadState(0);
+                gp.buttons =
+                    (r->buttons & PSClassicReport::Button::Cross ? io::GamePadState::Button::B : 0) |
+                    (r->buttons & PSClassicReport::Button::Circle ? io::GamePadState::Button::A : 0) |
+                    (r->hat & PSClassicReport::Button::SELECT ? io::GamePadState::Button::SELECT : 0) |
+                    (r->hat & PSClassicReport::Button::START ? io::GamePadState::Button::START : 0) |
+                    (r->hat & PSClassicReport::Button::UP ? io::GamePadState::Button::UP : 0) |
+                    (r->hat & PSClassicReport::Button::DOWN ? io::GamePadState::Button::DOWN : 0) |
+                    (r->hat & PSClassicReport::Button::LEFT ? io::GamePadState::Button::LEFT : 0) |
+                    (r->hat & PSClassicReport::Button::RIGHT ? io::GamePadState::Button::RIGHT : 0);
+                
                 if (memcmp(previousbuffer, report, len) != 0 || firstReport)
                 {
                     firstReport = false;
-                    printf("Genesis Mini: len = %d - ", len);
+                    printf("PS Classic: len = %d - ", len);
                     // print in binary len report bytes
                     for (int i = 0; i < len; i++)
                     {
@@ -457,12 +471,12 @@ extern "C"
                     printf("\n");
                     memcpy(previousbuffer, report, len);
                 }
-            // }
-            // else
-            // {
-            //     printf("Invalid Genesis Mini report size %zd\n", len);
-            //     return;
-            // }
+            }
+            else
+            {
+                printf("Invalid PSClassic Mini report size %zd\n", len);
+                return;
+            }
         }
         else
         {
