@@ -30,7 +30,11 @@ extern "C"
         {
             return vid == 0x054c && pid == 0x0ce6;
         }
-
+        bool isPSClassic(uint16_t vid, uint16_t pid)
+        {
+            return vid == 0x054c && pid == 0x0cda;
+        }
+        
         bool isGenesisMini(uint16_t vid, uint16_t pid)
         {
             return vid == 0x0ca3 && (pid == 0x0025 || pid == 0x0024);
