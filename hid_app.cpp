@@ -417,6 +417,53 @@ extern "C"
                 return;
             }
         }
+        else if (isPSClassic(vid, pid))
+        {
+            // if (sizeof(GenesisMiniReport) == len)
+            // {
+            //     auto r = reinterpret_cast<const GenesisMiniReport *>(report);
+            //     auto &gp = io::getCurrentGamePadState(0);
+            //     gp.buttons =
+            //         (r->byte6 & GenesisMiniReport::Button::B ? io::GamePadState::Button::B : 0) |
+            //         (r->byte6 & GenesisMiniReport::Button::A ? io::GamePadState::Button::A : 0) |
+            //         (r->byte7 & GenesisMiniReport::Button::C ? io::GamePadState::Button::SELECT : 0) |
+            //         (r->byte7 & GenesisMiniReport::Button::START ? io::GamePadState::Button::START : 0) |
+            //         (r->byte5 == GenesisMiniReport::Button::UP ? io::GamePadState::Button::UP : 0) |
+            //         (r->byte5 == GenesisMiniReport::Button::DOWN ? io::GamePadState::Button::DOWN : 0) |
+            //         (r->byte4 == GenesisMiniReport::Button::LEFT ? io::GamePadState::Button::LEFT : 0) |
+            //         (r->byte4 == GenesisMiniReport::Button::RIGHT ? io::GamePadState::Button::RIGHT : 0);
+
+                if (memcmp(previousbuffer, report, len) != 0 || firstReport)
+                {
+                    firstReport = false;
+                    printf("Genesis Mini: len = %d - ", len);
+                    // print in binary len report bytes
+                    for (int i = 0; i < len; i++)
+                    {
+                        for (int j = 0; j < 8; j++)
+                        {
+                            printf("%d", (report[i] >> (7 - j)) & 1);
+                        }
+                        printf(" ");
+                    }
+
+                    printf("\n");
+                    // print 8 bytes of report in hex
+                    printf("                        ");
+                    for (int i = 0; i < len; i++)
+                    {
+                        printf("      %02x ", report[i]);
+                    }
+                    printf("\n");
+                    memcpy(previousbuffer, report, len);
+                }
+            // }
+            // else
+            // {
+            //     printf("Invalid Genesis Mini report size %zd\n", len);
+            //     return;
+            // }
+        }
         else
         {
             if (rpt_count == 1 && rpt_info_arr[0].report_id == 0)
