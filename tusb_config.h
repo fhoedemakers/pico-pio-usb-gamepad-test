@@ -9,7 +9,7 @@
 extern "C"
 {
 #endif
-
+#define CFG_TUH_XINPUT 1
 #define CFG_TUSB_RHPORT0_MODE OPT_MODE_HOST
 
 #ifndef CFG_TUSB_OS

@@ -93,7 +93,7 @@ int main()
     tusb_init();
     while (true) {
         //printf("Hello, world!\n");
-        sleep_ms(1000 / 60);
+        //sleep_ms(1000 / 60);
         tuh_task();
         DWORD pdwPad1, pdwPad2, pdwSystem;
         InfoNES_PadState(&pdwPad1, &pdwPad2, &pdwSystem);

@@ -69,10 +69,13 @@ else()
     family_configure_target(usbcontrollertest "" )
 endif()
 
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tusb_xinput xinput_host)
+
 # Add the standard library to the build
 target_link_libraries(usbcontrollertest PRIVATE
         pico_stdlib
         tinyusb_host
+        xinput_host
         )
 
 # Add the standard include files to the build
