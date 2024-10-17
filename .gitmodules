@@ -1,0 +1,3 @@
+[submodule "tusb_xinput"]
+	path = tusb_xinput
+	url = git@github.com:fhoedemakers/tusb_xinput.git
