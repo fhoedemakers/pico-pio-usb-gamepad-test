@@ -710,21 +710,23 @@ void tuh_xinput_report_received_cb(uint8_t dev_addr, uint8_t instance, xinputh_i
             //       dev_addr, instance, type_str, p->wButtons, p->bLeftTrigger, p->bRightTrigger, p->sThumbLX, p->sThumbLY, p->sThumbRX, p->sThumbRY);
 
             //How to check specific buttons
-            if (p->wButtons & XINPUT_GAMEPAD_A) printf("You are pressing A\n");
-            if (p->wButtons & XINPUT_GAMEPAD_B) printf("You are pressing B\n");
-            if (p->wButtons & XINPUT_GAMEPAD_X) printf("You are pressing X\n");
-            if (p->wButtons & XINPUT_GAMEPAD_Y) printf("You are pressing Y\n");
-            if (p->wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) printf("You are pressing Left Shoulder\n");
-            if (p->wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) printf("You are pressing Right Shoulder\n");
-            if (p->wButtons & XINPUT_GAMEPAD_LEFT_THUMB) printf("You are pressing Left Thumb\n");
-            if (p->wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) printf("You are pressing Right Thumb\n");
-            if (p->wButtons & XINPUT_GAMEPAD_DPAD_UP) printf("You are pressing Dpad Up\n");
-            if (p->wButtons & XINPUT_GAMEPAD_DPAD_DOWN) printf("You are pressing Dpad Down\n");
-            if (p->wButtons & XINPUT_GAMEPAD_DPAD_LEFT) printf("You are pressing Dpad Left\n");
-            if (p->wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) printf("You are pressing Dpad Right\n");
-            if (p->wButtons & XINPUT_GAMEPAD_START) printf("You are pressing Start\n");
-            if (p->wButtons & XINPUT_GAMEPAD_BACK) printf("You are pressing Back\n");
-            if (p->wButtons & XINPUT_GAMEPAD_GUIDE) printf("You are pressing Guide\n");
+            auto &gp = io::getCurrentGamePadState(0);
+            gp.buttons = 0;
+            if (p->wButtons & XINPUT_GAMEPAD_A) gp.buttons |= io::GamePadState::Button::A;
+            if (p->wButtons & XINPUT_GAMEPAD_B) gp.buttons |= io::GamePadState::Button::B;
+            // if (p->wButtons & XINPUT_GAMEPAD_X) printf("You are pressing X\n");
+            // if (p->wButtons & XINPUT_GAMEPAD_Y) printf("You are pressing Y\n");
+            // if (p->wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) printf("You are pressing Left Shoulder\n");
+            // if (p->wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) printf("You are pressing Right Shoulder\n");
+            // if (p->wButtons & XINPUT_GAMEPAD_LEFT_THUMB) printf("You are pressing Left Thumb\n");
+            // if (p->wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) printf("You are pressing Right Thumb\n");
+            if (p->wButtons & XINPUT_GAMEPAD_DPAD_UP) gp.buttons |= io::GamePadState::Button::UP;
+            if (p->wButtons & XINPUT_GAMEPAD_DPAD_DOWN) gp.buttons |= io::GamePadState::Button::DOWN;
+            if (p->wButtons & XINPUT_GAMEPAD_DPAD_LEFT) gp.buttons |= io::GamePadState::Button::LEFT;
+            if (p->wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) gp.buttons |= io::GamePadState::Button::RIGHT;
+            if (p->wButtons & XINPUT_GAMEPAD_START) gp.buttons |= io::GamePadState::Button::START;
+            if (p->wButtons & XINPUT_GAMEPAD_BACK) gp.buttons |= io::GamePadState::Button::SELECT;
+           // if (p->wButtons & XINPUT_GAMEPAD_GUIDE) printf("You are pressing Guide\n");
 
         }
     }
