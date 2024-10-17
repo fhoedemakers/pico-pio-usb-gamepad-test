@@ -198,7 +198,8 @@ extern "C"
             {
                 inline static constexpr int A = 0b00100000;
                 inline static constexpr int B = 0b01000000;
-                inline static constexpr int X = 0b00010000;
+                //inline static constexpr int B = 0b00100000;   // On NES style controller b = X
+                inline static constexpr int X  = 0b00010000;
                 inline static constexpr int Y = 0b10000000;
                 inline static constexpr int SELECT = 0b00010000;
                 inline static constexpr int START = 0b00100000;
@@ -372,6 +373,7 @@ extern "C"
                 gp.buttons =
                     (r->byte6 & MantaPadReport::Button::A ? io::GamePadState::Button::A : 0) |
                     (r->byte6 & MantaPadReport::Button::B ? io::GamePadState::Button::B : 0) |
+                    (r->byte6 & MantaPadReport::Button::B1 ? io::GamePadState::Button::B : 0) |
                     (r->byte7 & MantaPadReport::Button::START ? io::GamePadState::Button::START : 0) |
                     (r->byte7 & MantaPadReport::Button::SELECT ? io::GamePadState::Button::SELECT : 0) |
                     (r->byte2 == MantaPadReport::Button::UP ? io::GamePadState::Button::UP : 0) |
