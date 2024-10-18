@@ -627,6 +627,30 @@ extern "C"
                             }
                         }
                     }
+                    if (memcmp(previousbuffer, report, len) != 0 || firstReport)
+                    {
+                        firstReport = false;
+                        printf("Keyboard: len = %d - ", len);
+                        // print in binary len report bytes
+                        for (int i = 0; i < len; i++)
+                        {
+                            for (int j = 0; j < 8; j++)
+                            {
+                                printf("%d", (report[i] >> (7 - j)) & 1);
+                            }
+                            printf(" ");
+                        }
+
+                        printf("\n");
+                        // print 8 bytes of report in hex
+                        printf("                        ");
+                        for (int i = 0; i < len; i++)
+                        {
+                            printf("      %02x ", report[i]);
+                        }
+                        printf("\n");
+                        memcpy(previousbuffer, report, len);
+                    }
                     break;
                 }
                 case HID_USAGE_DESKTOP_MOUSE:
@@ -674,85 +698,102 @@ extern "C"
             printf("Error: cannot request to receive report\r\n");
         }
     }
-#pragma region  XINPUT
-//Since https://github.com/hathach/tinyusb/pull/2222, we can add in custom vendor drivers easily
-usbh_class_driver_t const* usbh_app_driver_get_cb(uint8_t* driver_count){
-    *driver_count = 1;
-    return &usbh_xinput_driver;
-}
-
-// Tested devices
-// xbox Series X controller : Works
-// xbox One controller : Works
-// 8bitdo SN30 Pro+ V6.01: Works. Hold X + Start to switch to Xinput mode. (LED 1 and 2 will blink). Then connect to USB. 
-// 8bitdo Pro 2 V3.04: Works. Hold X + Start to switch to Xinput mode. (LED 1 and 2 will blink). Then connect to USB. 
-// SN30 PRO Wired : Not working, recognized but no report
-
-void tuh_xinput_report_received_cb(uint8_t dev_addr, uint8_t instance, xinputh_interface_t const* xid_itf, uint16_t len)
-{
-    const xinput_gamepad_t *p = &xid_itf->pad;
-    const char* type_str;
-
-    if (xid_itf->last_xfer_result == XFER_RESULT_SUCCESS)
+#pragma region XINPUT
+    // Since https://github.com/hathach/tinyusb/pull/2222, we can add in custom vendor drivers easily
+    usbh_class_driver_t const *usbh_app_driver_get_cb(uint8_t *driver_count)
     {
-        switch (xid_itf->type)
-        {
-            case 1: type_str = "Xbox One";          break;
-            case 2: type_str = "Xbox 360 Wireless"; break;
-            case 3: type_str = "Xbox 360 Wired";    break;
-            case 4: type_str = "Xbox OG";           break;
-            default: type_str = "Unknown";
-        }
-
-         if (xid_itf->connected && xid_itf->new_pad_data)
-        {
-            // printf("[%02x, %02x], Type: %s, Buttons %04x, LT: %02x RT: %02x, LX: %d, LY: %d, RX: %d, RY: %d\n",
-            //       dev_addr, instance, type_str, p->wButtons, p->bLeftTrigger, p->bRightTrigger, p->sThumbLX, p->sThumbLY, p->sThumbRX, p->sThumbRY);
-
-            //How to check specific buttons
-            auto &gp = io::getCurrentGamePadState(0);
-            gp.buttons = 0;
-            if (p->wButtons & XINPUT_GAMEPAD_A) gp.buttons |= io::GamePadState::Button::A;
-            if (p->wButtons & XINPUT_GAMEPAD_B) gp.buttons |= io::GamePadState::Button::B;
-            // if (p->wButtons & XINPUT_GAMEPAD_X) printf("You are pressing X\n");
-            // if (p->wButtons & XINPUT_GAMEPAD_Y) printf("You are pressing Y\n");
-            // if (p->wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) printf("You are pressing Left Shoulder\n");
-            // if (p->wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) printf("You are pressing Right Shoulder\n");
-            // if (p->wButtons & XINPUT_GAMEPAD_LEFT_THUMB) printf("You are pressing Left Thumb\n");
-            // if (p->wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) printf("You are pressing Right Thumb\n");
-            if (p->wButtons & XINPUT_GAMEPAD_DPAD_UP) gp.buttons |= io::GamePadState::Button::UP;
-            if (p->wButtons & XINPUT_GAMEPAD_DPAD_DOWN) gp.buttons |= io::GamePadState::Button::DOWN;
-            if (p->wButtons & XINPUT_GAMEPAD_DPAD_LEFT) gp.buttons |= io::GamePadState::Button::LEFT;
-            if (p->wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) gp.buttons |= io::GamePadState::Button::RIGHT;
-            if (p->wButtons & XINPUT_GAMEPAD_START) gp.buttons |= io::GamePadState::Button::START;
-            if (p->wButtons & XINPUT_GAMEPAD_BACK) gp.buttons |= io::GamePadState::Button::SELECT;
-           // if (p->wButtons & XINPUT_GAMEPAD_GUIDE) printf("You are pressing Guide\n");
-
-        }
+        *driver_count = 1;
+        return &usbh_xinput_driver;
     }
-    tuh_xinput_receive_report(dev_addr, instance);
-}
 
-void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_interface_t *xinput_itf)
-{
-    printf("XINPUT MOUNTED %02x %d\n", dev_addr, instance);
-    // If this is a Xbox 360 Wireless controller we need to wait for a connection packet
-    // on the in pipe before setting LEDs etc. So just start getting data until a controller is connected.
-    if (xinput_itf->type == XBOX360_WIRELESS && xinput_itf->connected == false)
+    // Tested devices
+    // xbox Series X controller : Works
+    // xbox One controller : Works
+    // 8bitdo SN30 Pro+ V6.01: Works. Hold X + Start to switch to Xinput mode. (LED 1 and 2 will blink). Then connect to USB.
+    // 8bitdo Pro 2 V3.04: Works. Hold X + Start to switch to Xinput mode. (LED 1 and 2 will blink). Then connect to USB.
+    // SN30 PRO Wired : Not working, recognized but no report
+
+    void tuh_xinput_report_received_cb(uint8_t dev_addr, uint8_t instance, xinputh_interface_t const *xid_itf, uint16_t len)
     {
+        const xinput_gamepad_t *p = &xid_itf->pad;
+        const char *type_str;
+
+        if (xid_itf->last_xfer_result == XFER_RESULT_SUCCESS)
+        {
+            switch (xid_itf->type)
+            {
+            case 1:
+                type_str = "Xbox One";
+                break;
+            case 2:
+                type_str = "Xbox 360 Wireless";
+                break;
+            case 3:
+                type_str = "Xbox 360 Wired";
+                break;
+            case 4:
+                type_str = "Xbox OG";
+                break;
+            default:
+                type_str = "Unknown";
+            }
+
+            if (xid_itf->connected && xid_itf->new_pad_data)
+            {
+                // printf("[%02x, %02x], Type: %s, Buttons %04x, LT: %02x RT: %02x, LX: %d, LY: %d, RX: %d, RY: %d\n",
+                //       dev_addr, instance, type_str, p->wButtons, p->bLeftTrigger, p->bRightTrigger, p->sThumbLX, p->sThumbLY, p->sThumbRX, p->sThumbRY);
+
+                // How to check specific buttons
+                auto &gp = io::getCurrentGamePadState(0);
+                gp.buttons = 0;
+                if (p->wButtons & XINPUT_GAMEPAD_A)
+                    gp.buttons |= io::GamePadState::Button::A;
+                if (p->wButtons & XINPUT_GAMEPAD_B)
+                    gp.buttons |= io::GamePadState::Button::B;
+                // if (p->wButtons & XINPUT_GAMEPAD_X) printf("You are pressing X\n");
+                // if (p->wButtons & XINPUT_GAMEPAD_Y) printf("You are pressing Y\n");
+                // if (p->wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) printf("You are pressing Left Shoulder\n");
+                // if (p->wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) printf("You are pressing Right Shoulder\n");
+                // if (p->wButtons & XINPUT_GAMEPAD_LEFT_THUMB) printf("You are pressing Left Thumb\n");
+                // if (p->wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) printf("You are pressing Right Thumb\n");
+                if (p->wButtons & XINPUT_GAMEPAD_DPAD_UP)
+                    gp.buttons |= io::GamePadState::Button::UP;
+                if (p->wButtons & XINPUT_GAMEPAD_DPAD_DOWN)
+                    gp.buttons |= io::GamePadState::Button::DOWN;
+                if (p->wButtons & XINPUT_GAMEPAD_DPAD_LEFT)
+                    gp.buttons |= io::GamePadState::Button::LEFT;
+                if (p->wButtons & XINPUT_GAMEPAD_DPAD_RIGHT)
+                    gp.buttons |= io::GamePadState::Button::RIGHT;
+                if (p->wButtons & XINPUT_GAMEPAD_START)
+                    gp.buttons |= io::GamePadState::Button::START;
+                if (p->wButtons & XINPUT_GAMEPAD_BACK)
+                    gp.buttons |= io::GamePadState::Button::SELECT;
+                // if (p->wButtons & XINPUT_GAMEPAD_GUIDE) printf("You are pressing Guide\n");
+            }
+        }
         tuh_xinput_receive_report(dev_addr, instance);
-        return;
     }
-    tuh_xinput_set_led(dev_addr, instance, 0, true);
-    tuh_xinput_set_led(dev_addr, instance, 1, true);
-    tuh_xinput_set_rumble(dev_addr, instance, 0, 0, true);
-    tuh_xinput_receive_report(dev_addr, instance);
-}
 
-void tuh_xinput_umount_cb(uint8_t dev_addr, uint8_t instance)
-{
-    printf("XINPUT UNMOUNTED %02x %d\n", dev_addr, instance);
-}
+    void tuh_xinput_mount_cb(uint8_t dev_addr, uint8_t instance, const xinputh_interface_t *xinput_itf)
+    {
+        printf("XINPUT MOUNTED %02x %d\n", dev_addr, instance);
+        // If this is a Xbox 360 Wireless controller we need to wait for a connection packet
+        // on the in pipe before setting LEDs etc. So just start getting data until a controller is connected.
+        if (xinput_itf->type == XBOX360_WIRELESS && xinput_itf->connected == false)
+        {
+            tuh_xinput_receive_report(dev_addr, instance);
+            return;
+        }
+        tuh_xinput_set_led(dev_addr, instance, 0, true);
+        tuh_xinput_set_led(dev_addr, instance, 1, true);
+        tuh_xinput_set_rumble(dev_addr, instance, 0, 0, true);
+        tuh_xinput_receive_report(dev_addr, instance);
+    }
+
+    void tuh_xinput_umount_cb(uint8_t dev_addr, uint8_t instance)
+    {
+        printf("XINPUT UNMOUNTED %02x %d\n", dev_addr, instance);
+    }
 #pragma endregion
 #ifdef __cplusplus
 }

@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
+#include "hardware/watchdog.h"
 #include <gamepad.h>
 #include "tusb.h"
+
 
 typedef unsigned long DWORD;
 void InfoNES_PadState(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem)
@@ -76,6 +78,8 @@ void InfoNES_PadState(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem)
             if (pushed & UP)
             {
                printf("UP\n");
+               watchdog_enable(500, 1);
+               printf("Rebooting\n");
             }
             else if (pushed & DOWN)
             {
@@ -90,6 +94,7 @@ void InfoNES_PadState(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem)
 int main()
 {
     stdio_init_all();
+    printf("Started.\n");
     tusb_init();
     while (true) {
         //printf("Hello, world!\n");

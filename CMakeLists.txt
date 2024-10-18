@@ -75,7 +75,7 @@ pico_enable_stdio_usb(usbcontrollertest 0)
 # tinyusb
 set(FAMILY rp2040)
 set(BOARD pico_sdk)
-set(TINYUSB_DEBUG_LEVE 0)
+set(TINYUSB_DEBUG_LEVE 1)
 include(${PICO_TINYUSB_PATH}/hw/bsp/${FAMILY}/family.cmake)
 if (PICO_SDK_VERSION_MAJOR LESS 2)
     family_configure_target(usbcontrollertest)

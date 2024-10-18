@@ -16,6 +16,13 @@ extern "C"
 #define CFG_TUSB_OS OPT_OS_NONE
 #endif
 
+// #ifdef CFG_TUSB_DEBUG
+// #undef CFG_TUSB_DEBUG
+// #endif
+#ifndef CFG_TUSB_DEBUG
+#define CFG_TUSB_DEBUG 2
+#endif
+
 #define CFG_TUSB_MEM_SECTION
 #define CFG_TUSB_MEM_ALIGN __attribute__((aligned(4)))
 
