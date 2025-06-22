@@ -1,12 +1,19 @@
 cmake_minimum_required(VERSION 3.20)
 
-#set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-# include from environment var PICO_SDK_PATH
+# Adafruit Metro RP2350 board config
 set(BOARD adafruit_metro_rp2350)
-set(PICO_BOARD ${BOARD})
+set(PICO_BOARD adafruit_metro_rp2350)
+#  RP2350 config
+# set(BOARD pico_sdk)
+# set(PICO_BOARD pico2)
+# WHen using PIO USB:
+# set(PICO_DEFAULT_PIO_USB_DP_PIN GpioPinD+)
 set(PICO_SDK_PATH $ENV{PICO_SDK_PATH})
 # set PICO_PIO_USB_PATH if not set
 if(NOT DEFINED PICO_PIO_USB_PATH)
+  if(NOT DEFINED ENV{PICO_PIO_USB_PATH})
+    message(FATAL_ERROR "PICO_PIO_USB_PATH environment variable is not set. Please fetch the repo https://github.com/sekigon-gonnoc/Pico-PIO-USB and set the PICO_PIO_USB_PATH environment variable to the path of the repo.")
+  endif()
   set(PICO_PIO_USB_PATH $ENV{PICO_PIO_USB_PATH})
 endif()
 set(PICO_BOARD_HEADER_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/boards)
@@ -35,6 +42,7 @@ target_include_directories(${PROJECT} PUBLIC
 
 target_compile_definitions(${PROJECT} PRIVATE
     CFG_TUH_RPI_PIO_USB=1
+    #PICO_DEFAULT_PIO_USB_DP_PIN=32
 )
 # Configure compilation flags and libraries for the example without RTOS.
 # See the corresponding function in hw/bsp/FAMILY/family.cmake for details.
