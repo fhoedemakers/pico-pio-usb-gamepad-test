@@ -1,116 +1,71 @@
-# == DO NEVER EDIT THE NEXT LINES for Raspberry Pi Pico VS Code Extension to work ==
-if(WIN32)
-    set(USERHOME $ENV{USERPROFILE})
-else()
-    set(USERHOME $ENV{HOME})
-endif()
-set(sdkVersion 2.0.0)
-set(toolchainVersion 13_2_Rel1)
-set(picotoolVersion 2.0.0)
-set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
-if (EXISTS ${picoVscode})
-    include(${picoVscode})
-endif()
-# ====================================================================================
-# == DO NEVER EDIT THE NEXT LINES for Raspberry Pi Pico VS Code Extension to work ==
-if(WIN32)
-    set(USERHOME $ENV{USERPROFILE})
-else()
-    set(USERHOME $ENV{HOME})
-endif()
-set(sdkVersion 2.0.0)
-set(toolchainVersion 13_2_Rel1)
-set(picotoolVersion 2.0.0)
-set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
-if (EXISTS ${picoVscode})
-    include(${picoVscode})
-endif()
-# ====================================================================================
-# == DO NEVER EDIT THE NEXT LINES for Raspberry Pi Pico VS Code Extension to work ==
-if(WIN32)
-    set(USERHOME $ENV{USERPROFILE})
-else()
-    set(USERHOME $ENV{HOME})
-endif()
-set(sdkVersion 2.0.0)
-set(toolchainVersion 13_2_Rel1)
-set(picotoolVersion 2.0.0)
-set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
-if (EXISTS ${picoVscode})
-    include(${picoVscode})
-endif()
-# ====================================================================================
-# Generated Cmake Pico project file
+cmake_minimum_required(VERSION 3.20)
 
-cmake_minimum_required(VERSION 3.13)
-
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-# Initialise pico_sdk from installed location
-# (note this can come from environment, CMake cache etc)
-
-# == DO NEVER EDIT THE NEXT LINES for Raspberry Pi Pico VS Code Extension to work ==
-if(WIN32)
-    set(USERHOME $ENV{USERPROFILE})
-else()
-    set(USERHOME $ENV{HOME})
+#set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# include from environment var PICO_SDK_PATH
+set(BOARD adafruit_metro_rp2350)
+set(PICO_BOARD ${BOARD})
+set(PICO_SDK_PATH $ENV{PICO_SDK_PATH})
+# set PICO_PIO_USB_PATH if not set
+if(NOT DEFINED PICO_PIO_USB_PATH)
+  set(PICO_PIO_USB_PATH $ENV{PICO_PIO_USB_PATH})
 endif()
-set(sdkVersion 2.0.0)
-set(toolchainVersion 13_2_Rel1)
-set(picotoolVersion 2.0.0)
-set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
-if (EXISTS ${picoVscode})
-    include(${picoVscode})
-endif()
-# ====================================================================================
-set(PICO_BOARD pico CACHE STRING "Board type")
-
-# Pull in Raspberry Pi Pico SDK (must be before project)
+set(PICO_BOARD_HEADER_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/boards)
+message(STATUS "Using PICO_SDK_PATH: ${PICO_SDK_PATH}")
+message(STATUS "Using PICO_PIO_USB_PATH: ${PICO_PIO_USB_PATH}")
 include(pico_sdk_import.cmake)
+include(${PICO_SDK_PATH}/lib/tinyusb/hw/bsp/family_support.cmake)
 
-project(usbcontrollertest C CXX ASM)
+#family_get_project_name(PROJECT ${CMAKE_CURRENT_LIST_DIR})
+set(PROJECT "usbcontrollertest")
+project(${PROJECT} C CXX ASM)
 
-# Initialise the Raspberry Pi Pico SDK
-pico_sdk_init()
+# Checks this example is valid for the family and initializes the project
+family_initialize_project(${PROJECT} ${CMAKE_CURRENT_LIST_DIR})
+add_executable(${PROJECT})
 
-# Add executable. Default name is the project name, version 0.1
-
-add_executable(usbcontrollertest usbcontrollertest.cpp gamepad.cpp hid_app.cpp)
-
-pico_set_program_name(usbcontrollertest "usbcontrollertest")
-pico_set_program_version(usbcontrollertest "0.1")
-
-# Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(usbcontrollertest 1)
-pico_enable_stdio_usb(usbcontrollertest 0)
-
-# tinyusb
-set(FAMILY rp2040)
-set(BOARD pico_sdk)
-set(TINYUSB_DEBUG_LEVE 1)
-include(${PICO_TINYUSB_PATH}/hw/bsp/${FAMILY}/family.cmake)
-if (PICO_SDK_VERSION_MAJOR LESS 2)
-    family_configure_target(usbcontrollertest)
-else()
-    family_configure_target(usbcontrollertest "" )
-endif()
-
+# Example source
+target_sources(${PROJECT} PUBLIC
+ usbcontrollertest.cpp gamepad.cpp hid_app.cpp
+  )
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tusb_xinput xinput_host)
+# Example include
+target_include_directories(${PROJECT} PUBLIC
+  .
+  )
 
-# Add the standard library to the build
-target_link_libraries(usbcontrollertest PRIVATE
-        pico_stdlib
-        tinyusb_host
-        xinput_host
-        )
-
-# Add the standard include files to the build
-target_include_directories(usbcontrollertest PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}
-  ${CMAKE_CURRENT_LIST_DIR}/.. # for our common lwipopts or any other standard includes, if required
+target_compile_definitions(${PROJECT} PRIVATE
+    CFG_TUH_RPI_PIO_USB=1
+)
+# Configure compilation flags and libraries for the example without RTOS.
+# See the corresponding function in hw/bsp/FAMILY/family.cmake for details.
+family_configure_target(${PROJECT} "")
+# require tinyusb_pico_pio_usb
+target_link_libraries(${PROJECT} PUBLIC pico_stdlib tinyusb_device tinyusb_host tinyusb_pico_pio_usb xinput_host)
+rp2040_family_configure_example_warnings(${PROJECT})
+target_compile_options(${PROJECT} PUBLIC 
+    -Wno-error 
+    -Wno-shadow
+    -Wno-cast-align
+    -Wno-cast-qual
+    -Wno-redundant-decls
+    -Wno-sign-conversion
+    -Wno-conversion
+    -Wno-sign-compare
+    -Wno-unused-function
+    -Wno-format
+    -Wno-suggest-attribute=format
+    -Wno-unused-parameter
+    -Wno-conversion
+    -Wno-sequence-point
+    -Wno-unused-variable
+    -Wno-implicit-fallthrough
+    -Wno-array-bounds
+    -Wno-type-limits
+    -Wno-parentheses
 )
 
-pico_add_extra_outputs(usbcontrollertest)
-
+pico_enable_stdio_uart(${PROJECT} 1)
+pico_enable_stdio_usb(${PROJECT} 0)
+# display the all the target_link_libraries
+get_target_property(LINK_LIBS ${PROJECT} LINK_LIBRARIES)
+message(STATUS "Target ${PROJECT} link libraries: ${LINK_LIBS}")

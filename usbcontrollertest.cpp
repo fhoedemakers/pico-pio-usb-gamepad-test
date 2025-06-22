@@ -2,8 +2,10 @@
 #include "pico/stdlib.h"
 #include "hardware/watchdog.h"
 #include <gamepad.h>
+#if CFG_TUH_RPI_PIO_USB
+#include "bsp/board_api.h"
+#endif
 #include "tusb.h"
-
 
 typedef unsigned long DWORD;
 void InfoNES_PadState(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem)
@@ -50,42 +52,41 @@ void InfoNES_PadState(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem)
 
         auto p1 = v;
         auto pushed = v & ~prevButtons[i];
-      
-            if (pushed & LEFT)
-            {
-               printf("LEFT\n");
-            }
-            if (pushed & RIGHT)
-            {
-                printf("RIGHT\n");
-            }
-            if (pushed & START)
-            {
-                printf("START\n");
-            }
-            if (pushed & SELECT)
-            {
-                printf("SELECT\n");
-            }
-            if (pushed & A)
-            {
-               printf("A\n");
-            }
-            if (pushed & B)
-            {
-                printf("B\n");
-            }
-            if (pushed & UP)
-            {
-               printf("UP\n");
-               watchdog_enable(500, 1);
-               printf("Rebooting\n");
-            }
-            else if (pushed & DOWN)
-            {
-               printf("DOWN\n"); 
-            }
-      
+
+        if (pushed & LEFT)
+        {
+            printf("LEFT\n");
+        }
+        if (pushed & RIGHT)
+        {
+            printf("RIGHT\n");
+        }
+        if (pushed & START)
+        {
+            printf("START\n");
+        }
+        if (pushed & SELECT)
+        {
+            printf("SELECT\n");
+        }
+        if (pushed & A)
+        {
+            printf("A\n");
+        }
+        if (pushed & B)
+        {
+            printf("B\n");
+        }
+        if (pushed & UP)
+        {
+            printf("UP\n");
+            //    watchdog_enable(500, 1);
+            //    printf("Rebooting\n");
+        }
+        else if (pushed & DOWN)
+        {
+            printf("DOWN\n");
+        }
 
         prevButtons[i] = v;
     }
@@ -93,12 +94,28 @@ void InfoNES_PadState(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem)
 
 int main()
 {
+   
     stdio_init_all();
     printf("Started.\n");
+
+#if CFG_TUH_RPI_PIO_USB
+    board_init();
+    tusb_rhport_init_t host_init = {
+        .role = TUSB_ROLE_HOST,
+        .speed = TUSB_SPEED_AUTO};
+    tusb_init(BOARD_TUH_RHPORT, &host_init);
+
+    if (board_init_after_tusb)
+    {
+        board_init_after_tusb();
+    }
+#else
     tusb_init();
-    while (true) {
-        //printf("Hello, world!\n");
-        //sleep_ms(1000 / 60);
+#endif
+    while (true)
+    {
+        // printf("Hello, world!\n");
+        // sleep_ms(1000 / 60);
         tuh_task();
         DWORD pdwPad1, pdwPad2, pdwSystem;
         InfoNES_PadState(&pdwPad1, &pdwPad2, &pdwSystem);

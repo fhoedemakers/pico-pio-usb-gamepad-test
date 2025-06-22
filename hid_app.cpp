@@ -373,7 +373,7 @@ extern "C"
                 gp.buttons =
                     (r->byte6 & MantaPadReport::Button::A ? io::GamePadState::Button::A : 0) |
                     (r->byte6 & MantaPadReport::Button::B ? io::GamePadState::Button::B : 0) |
-                    (r->byte6 & MantaPadReport::Button::B1 ? io::GamePadState::Button::B : 0) |
+                   // (r->byte6 & MantaPadReport::Button::B1 ? io::GamePadState::Button::B : 0) |
                     (r->byte7 & MantaPadReport::Button::START ? io::GamePadState::Button::START : 0) |
                     (r->byte7 & MantaPadReport::Button::SELECT ? io::GamePadState::Button::SELECT : 0) |
                     (r->byte2 == MantaPadReport::Button::UP ? io::GamePadState::Button::UP : 0) |
@@ -700,6 +700,7 @@ extern "C"
             printf("Error: cannot request to receive report\r\n");
         }
     }
+#if CFG_TUH_XINPUT
 #pragma region XINPUT
     // Since https://github.com/hathach/tinyusb/pull/2222, we can add in custom vendor drivers easily
     usbh_class_driver_t const *usbh_app_driver_get_cb(uint8_t *driver_count)
@@ -797,6 +798,7 @@ extern "C"
         printf("XINPUT UNMOUNTED %02x %d\n", dev_addr, instance);
     }
 #pragma endregion
+#endif
 #ifdef __cplusplus
 }
 #endif
