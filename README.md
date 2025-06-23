@@ -2,7 +2,7 @@
 
 # pre-requesites
 
-- Adafruit Metro RP2350. Other RP2350 type boards should also work, but you need to modify CMakeLists.txt for this to work.
+- Adafruit Metro RP2350 and other boards. See below.
 - Raspberry PI Pico SDK
 - Latest master branch of Tiny-USB.  https://github.com/hathach/tinyusb/tree/master
 - Latest main branch of Pico PIO USB. https://github.com/sekigon-gonnoc/Pico-PIO-USB/tree/main Set the environment var PICO_PIO_USB_PATH to the location of that repo.
