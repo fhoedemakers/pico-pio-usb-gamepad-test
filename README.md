@@ -1,6 +1,7 @@
 # USB Gamepad Test Program for RP2040/RP2350 microcontrollers using PIO USB
 
-This C++ project demonstrates USB gamepad support on RP2040/RP3250-based boards using the PIO USB stack. It displays the buttons pressed to the serial console.
+This C++ project demonstrates USB gamepad support on RP2040 and RP2350-based boards using PIO USB.  
+It prints the pressed gamepad buttons to the serial console for easy debugging and testing.
 
 ![image](https://github.com/user-attachments/assets/fa70e238-576d-45be-8396-d0fd65f524bb)
 
@@ -113,9 +114,10 @@ See `hid_app.cpp` for the full list of tested controllers. Confirmed working:
 ## Additional Notes
 
 - For wiring details and pin assignments, refer to the board documentation and the `CMakeLists.txt` options.
-- Some low speed devices like keyaboards might not work with PIO usb.
-- Button labels are shown in the serial console in a NES controller style fashion. A, B, Select, Start, Left, Right, Up, Down. Other buttons are not shown. Will fix this maybe later.
-
+- Some low speed devices like keyboards might not work with PIO usb.
+- Button labels are displayed in the serial console using a NES controller style:  
+  **A, B, Select, Start, Left, Right, Up, Down**.  
+  Other buttons are currently not shown.
 
 
 ---
