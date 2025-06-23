@@ -1,6 +1,6 @@
 # USB Gamepad Test Program for Adafruit Metro RP2350 Using PIO USB
 
-This project demonstrates USB gamepad support on the [usb host breakout](https://learn.adafruit.com/adafruit-metro-rp2350/pinouts#usb-host-pins-3193156) of the [Adafruit Metro RP2350](https://www.adafruit.com/product/6003) and other RP2250-based boards using the PIO USB stack.
+This C++ project demonstrates USB gamepad support on the [usb host breakout](https://learn.adafruit.com/adafruit-metro-rp2350/pinouts#usb-host-pins-3193156) of the [Adafruit Metro RP2350](https://www.adafruit.com/product/6003) and other RP2250-based boards using the PIO USB stack.
 
 ---
 
