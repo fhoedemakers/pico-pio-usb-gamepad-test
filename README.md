@@ -1,14 +1,16 @@
 # USB Gamepad Test Program for Adafruit Metro RP2350 Using PIO USB
 
-This C++ project demonstrates USB gamepad support on the [usb host breakout](https://learn.adafruit.com/adafruit-metro-rp2350/pinouts#usb-host-pins-3193156) of the [Adafruit Metro RP2350](https://www.adafruit.com/product/6003) and other RP2250-based boards using the PIO USB stack.
+This C++ project demonstrates USB gamepad support on the [usb host breakout pins](https://learn.adafruit.com/adafruit-metro-rp2350/pinouts#usb-host-pins-3193156) for the [Adafruit Metro RP2350](https://www.adafruit.com/product/6003) and other RP2040/RP3250-based boards using the PIO USB stack.
 
 ---
 
 ## Prerequisites
 
 - **Hardware:**  
-  - Adafruit Metro RP2350. You need this cable to connect to the usb host breakout: [USB Type A Jack Breakout Cable with Premium Female Jumpers](https://www.adafruit.com/product/4449)
-  - Other compatible RP2350 boards (e.g., Raspberry Pico 2) with an external usb connector attached.
+  - Adafruit Metro RP2350. You also need this cable to connect to the usb host breakout: [USB Type A Jack Breakout Cable with Premium Female Jumpers](https://www.adafruit.com/product/4449)
+  - Other compatible RP2040/RP2350 boards (e.g., Raspberry Pico 2) with an external usb connector attached. Like the [WaveShare RP2040 PiZero](https://www.waveshare.com/rp2040-pizero.htm) or similar boards.
+  - USB gamepad or controller (e.g., Xbox-style, DualShock 4, DualSense, etc.)
+
 - **Software:**  
   - [Raspberry Pi Pico SDK](https://github.com/raspberrypi/pico-sdk)
   - [TinyUSB (latest master)](https://github.com/hathach/tinyusb/tree/master)
@@ -36,9 +38,10 @@ make
 
 ---
 
-### For Other RP2040 Boards
+### For Other RP2040/RP2350 Boards
 
-Example: Building for a Raspberry Pi Pico 2 with PIO-USB enabled on an external USB connector (DP+ on GPIO 4, DP- on GPIO 5):
+### Building for Raspberry Pi Pico 2 with PIO USB
+Example: Building for a Raspberry Pi Pico 2 with PIO-USB enabled on an external USB connector (DP+ on GPIO 16, DP- on GPIO 17):
 
 ```bash
 git clone https://github.com/fhoedemakers/pico-pio-usb-gamepad-test.git
@@ -46,11 +49,27 @@ cd pico-pio-usb-gamepad-test
 git submodule update --init
 mkdir build
 cd build
-cmake -DBOARD=pico_sdk -DPICO_BOARD=pico2 -DPIO_DP_PLUS_PIN=4 ..
+cmake -DBOARD=pico_sdk -DPICO_BOARD=pico2 -DPIO_DP_PLUS_PIN=16 ..
+make
+```
+
+### Building for the WaveShare RP2040 PiZero
+
+Example: Building for the [WaveShare RP2040 PiZero](https://www.waveshare.com/rp2040-pizero.htm) with PIO-USB enabled on USB port labeled PIO USB (DP+ on GPIO 6, DP- on GPIO 7):
+
+```bash
+git clone https://github.com/fhoedemakers/pico-pio-usb-gamepad-test.git
+cd pico-pio-usb-gamepad-test
+git submodule update --init
+mkdir build
+cd build
+cmake -DBOARD=pico_sdk -DPICO_BOARD=pico -DPIO_DP_PLUS_PIN=6 ..
 make
 ```
 
 ---
+
+
 
 ### Using the Internal USB Connector (Disabling PIO USB)
 
@@ -85,7 +104,6 @@ See `hid_app.cpp` for the full list of tested controllers. Confirmed working:
 ## Additional Notes
 
 - For wiring details and pin assignments, refer to the board documentation and the `CMakeLists.txt` options.
-- Contributions and pull requests are welcome!
 
 ---
 
