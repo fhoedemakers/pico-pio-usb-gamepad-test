@@ -7,7 +7,7 @@ This C++ project demonstrates USB gamepad support on the [usb host breakout](htt
 ## Prerequisites
 
 - **Hardware:**  
-  - Adafruit Metro RP2350. You need this cable to connect to the usb host breakout. [USB Type A Jack Breakout Cable with Premium Female Jumpers](https://www.adafruit.com/product/4449)
+  - Adafruit Metro RP2350. You need this cable to connect to the usb host breakout: [USB Type A Jack Breakout Cable with Premium Female Jumpers](https://www.adafruit.com/product/4449)
   - Other compatible RP2350 boards (e.g., Raspberry Pico 2) with an external usb connector attached.
 - **Software:**  
   - [Raspberry Pi Pico SDK](https://github.com/raspberrypi/pico-sdk)
