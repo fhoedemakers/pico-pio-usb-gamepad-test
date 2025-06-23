@@ -1,6 +1,6 @@
-# USB Gamepad Test Program for Adafruit Metro RP2350 Using PIO USB
+# USB Gamepad Test Program for RP2040/RP2350 microcontrolers using PIO USB
 
-This C++ project demonstrates USB gamepad support on the [usb host breakout pins](https://learn.adafruit.com/adafruit-metro-rp2350/pinouts#usb-host-pins-3193156) for the [Adafruit Metro RP2350](https://www.adafruit.com/product/6003) and other RP2040/RP3250-based boards using the PIO USB stack.
+This C++ project demonstrates USB gamepad support on RP2040/RP3250-based boards using the PIO USB stack.
 
 ---
 
@@ -25,6 +25,8 @@ Program output is printed to the serial console (GPIO-0 and GPIO-1).
 ## Building the Project
 
 ### For Adafruit Metro RP2350
+This is the default config.
+Connect the gamepad to the [usb host breakout pins](https://learn.adafruit.com/adafruit-metro-rp2350/pinouts#usb-host-pins-3193156) You need to solder the headers yopurself.
 
 ```bash
 git clone https://github.com/fhoedemakers/pico-pio-usb-gamepad-test.git
@@ -35,6 +37,7 @@ cd build
 cmake ..
 make
 ```
+![IMG_8837](https://github.com/user-attachments/assets/c1390c02-6b30-4c21-aceb-b55fb0549fed)
 
 ---
 
@@ -52,6 +55,10 @@ cd build
 cmake -DBOARD=pico_sdk -DPICO_BOARD=pico2 -DPIO_DP_PLUS_PIN=16 ..
 make
 ```
+
+![IMG_8838](https://github.com/user-attachments/assets/ab0793d7-bcb8-426e-abe7-ac72265c4864)
+
+
 
 ### Building for the WaveShare RP2040 PiZero
 
@@ -104,6 +111,7 @@ See `hid_app.cpp` for the full list of tested controllers. Confirmed working:
 ## Additional Notes
 
 - For wiring details and pin assignments, refer to the board documentation and the `CMakeLists.txt` options.
+- SOme low speed devices like keyaboards might not work with PIO usb.
 
 ---
 
