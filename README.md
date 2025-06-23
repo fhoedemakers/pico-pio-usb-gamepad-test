@@ -10,7 +10,7 @@ This C++ project demonstrates USB gamepad support on RP2040/RP3250-based boards 
 
 - **Hardware:**  
   - Adafruit Metro RP2350. You also need this cable to connect to the usb host breakout: [USB Type A Jack Breakout Cable with Premium Female Jumpers](https://www.adafruit.com/product/4449)
-  - Other compatible RP2040/RP2350 boards (e.g., Raspberry Pico 2) with an external usb connector attached. Like the [WaveShare RP2040 PiZero](https://www.waveshare.com/rp2040-pizero.htm) or similar boards.
+  - Other compatible RP2040/RP2350 boards (e.g., Raspberry Pico/Pico 2) with an external usb connector attached. Like the [WaveShare RP2040 PiZero](https://www.waveshare.com/rp2040-pizero.htm) or similar boards.
   - USB gamepad or controller (e.g., Xbox-style, DualShock 4, DualSense, etc.)
 
 - **Software:**  
