@@ -114,7 +114,7 @@ See `hid_app.cpp` for the full list of tested controllers. Confirmed working:
 
 - For wiring details and pin assignments, refer to the board documentation and the `CMakeLists.txt` options.
 - Some low speed devices like keyaboards might not work with PIO usb.
-- Buttons labels are shown in a NES controller style fashion. A, B, Select, Start, Left, Right, Up, Down. Other buttons are not shown. Will fix this maybe later.
+- Button labels are shown in the serial console in a NES controller style fashion. A, B, Select, Start, Left, Right, Up, Down. Other buttons are not shown. Will fix this maybe later.
 
 
 
