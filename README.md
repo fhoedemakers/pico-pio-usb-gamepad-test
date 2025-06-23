@@ -113,7 +113,8 @@ See `hid_app.cpp` for the full list of tested controllers. Confirmed working:
 ## Additional Notes
 
 - For wiring details and pin assignments, refer to the board documentation and the `CMakeLists.txt` options.
-- SOme low speed devices like keyaboards might not work with PIO usb.
+- Some low speed devices like keyaboards might not work with PIO usb.
+
 
 ---
 
