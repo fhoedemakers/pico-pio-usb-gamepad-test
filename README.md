@@ -7,14 +7,16 @@
 - Latest master branch of Tiny-USB.  https://github.com/hathach/tinyusb/tree/master
 - Latest main branch of Pico PIO USB. https://github.com/sekigon-gonnoc/Pico-PIO-USB/tree/main Set the environment var PICO_PIO_USB_PATH to the location of that repo.
 
-## PIO USB usage
+## How to build for the Adefruit Metro RP2350
 
-Can be used with PIO-USB by setting 
-
-```cmake
-target_compile_definitions(${PROJECT} PRIVATE
-    CFG_TUH_RPI_PIO_USB=1
-)
+```bash
+git clone https://github.com/fhoedemakers/pico-pio-usb-gamepad-test.git
+cd pico-pio-usb-gamepad-test
+git submodule update --init
+mkdir build
+cd build
+cmake ..
+make
 ```
 In CMakeLists.txt
 
