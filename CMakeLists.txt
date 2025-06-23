@@ -1,8 +1,18 @@
 cmake_minimum_required(VERSION 3.20)
 
 # Adafruit Metro RP2350 board config
-set(BOARD adafruit_metro_rp2350)
-set(PICO_BOARD adafruit_metro_rp2350)
+if (NOT DEFINED BOARD)
+  set(BOARD adafruit_metro_rp2350)
+endif()
+if (NOT DEFINED PICO_BOARD)
+  set(PICO_BOARD adafruit_metro_rp2350)
+endif()
+if (NOT DEFINED ENABLE_PIO_USB)
+  message("Enabling PIO USB support by default")
+  set(ENABLE_PIO_USB 1)
+endif()
+
+# set(PICO_BOARD adafruit_metro_rp2350)
 #  RP2350 config
 # set(BOARD pico_sdk)
 # set(PICO_BOARD pico2)
@@ -38,12 +48,17 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tusb_xinput xinput_host)
 # Example include
 target_include_directories(${PROJECT} PUBLIC
   .
-  )
-
-target_compile_definitions(${PROJECT} PRIVATE
-    CFG_TUH_RPI_PIO_USB=1
-    #PICO_DEFAULT_PIO_USB_DP_PIN=32
 )
+if ( NOT DEFINED PIO_DP_PLUS_PIN )
+    target_compile_definitions(${PROJECT} PRIVATE
+    CFG_TUH_RPI_PIO_USB=${ENABLE_PIO_USB} # Enable PIO USB support
+    )
+else()
+    target_compile_definitions(${PROJECT} PRIVATE
+      CFG_TUH_RPI_PIO_USB=${ENABLE_PIO_USB} # Enable PIO USB support
+      PICO_DEFAULT_PIO_USB_DP_PIN=${PIO_DP_PLUS_PIN} # Use the specified pin for PIO USB DP
+    )
+endif()
 # Configure compilation flags and libraries for the example without RTOS.
 # See the corresponding function in hw/bsp/FAMILY/family.cmake for details.
 family_configure_target(${PROJECT} "")

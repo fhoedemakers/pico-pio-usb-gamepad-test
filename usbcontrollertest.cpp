@@ -99,6 +99,7 @@ int main()
     printf("Started.\n");
 
 #if CFG_TUH_RPI_PIO_USB
+    printf("Using PIO USB.\n");
     board_init();
     tusb_rhport_init_t host_init = {
         .role = TUSB_ROLE_HOST,
@@ -110,6 +111,7 @@ int main()
         board_init_after_tusb();
     }
 #else
+    printf("Using internal USB.\n");
     tusb_init();
 #endif
     while (true)
