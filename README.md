@@ -1,6 +1,8 @@
 # USB Gamepad Test Program for RP2040/RP2350 microcontrollers using PIO USB
 
-This C++ project demonstrates USB gamepad support on RP2040/RP3250-based boards using the PIO USB stack.
+This C++ project demonstrates USB gamepad support on RP2040/RP3250-based boards using the PIO USB stack. It displays the buttons pressed to the serial console.
+
+![image](https://github.com/user-attachments/assets/fa70e238-576d-45be-8396-d0fd65f524bb)
 
 ---
 
