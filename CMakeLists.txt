@@ -63,28 +63,28 @@ endif()
 family_configure_target(${PROJECT} "")
 # require tinyusb_pico_pio_usb
 target_link_libraries(${PROJECT} PUBLIC pico_stdlib tinyusb_device tinyusb_host tinyusb_pico_pio_usb xinput_host)
-rp2040_family_configure_example_warnings(${PROJECT})
-target_compile_options(${PROJECT} PUBLIC 
-    -Wno-error 
-    -Wno-shadow
-    -Wno-cast-align
-    -Wno-cast-qual
-    -Wno-redundant-decls
-    -Wno-sign-conversion
-    -Wno-conversion
-    -Wno-sign-compare
-    -Wno-unused-function
-    -Wno-format
-    -Wno-suggest-attribute=format
-    -Wno-unused-parameter
-    -Wno-conversion
-    -Wno-sequence-point
-    -Wno-unused-variable
-    -Wno-implicit-fallthrough
-    -Wno-array-bounds
-    -Wno-type-limits
-    -Wno-parentheses
-)
+# rp2040_family_configure_example_warnings(${PROJECT})
+# target_compile_options(${PROJECT} PUBLIC 
+#     -Wno-error 
+#     -Wno-shadow
+#     -Wno-cast-align
+#     -Wno-cast-qual
+#     -Wno-redundant-decls
+#     -Wno-sign-conversion
+#     -Wno-conversion
+#     -Wno-sign-compare
+#     -Wno-unused-function
+#     -Wno-format
+#     -Wno-suggest-attribute=format
+#     -Wno-unused-parameter
+#     -Wno-conversion
+#     -Wno-sequence-point
+#     -Wno-unused-variable
+#     -Wno-implicit-fallthrough
+#     -Wno-array-bounds
+#     -Wno-type-limits
+#     -Wno-parentheses
+# )
 
 pico_enable_stdio_uart(${PROJECT} 1)
 pico_enable_stdio_usb(${PROJECT} 0)
