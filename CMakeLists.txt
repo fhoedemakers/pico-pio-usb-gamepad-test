@@ -26,7 +26,7 @@ endif()
 set(PICO_BOARD_HEADER_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/boards)
 message(STATUS "Using PICO_SDK_PATH: ${PICO_SDK_PATH}")
 message(STATUS "Using PICO_PIO_USB_PATH: ${PICO_PIO_USB_PATH}")
-include(pico_sdk_import.cmake)
+#include(pico_sdk_import.cmake)
 include(${PICO_SDK_PATH}/lib/tinyusb/hw/bsp/family_support.cmake)
 
 set(PROJECT "usbcontrollertest")
